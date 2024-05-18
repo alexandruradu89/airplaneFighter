@@ -7,19 +7,19 @@
     height: 30px;
   }
 
-  .projectile {
+.projectile {
     background-color: red;
     border-radius: 50%;
-  }
+}
 
-  .default-cell {
+.default-cell {
     background-color: white;
-  }
+}
 
-  .airplane-cell {
+.airplane-cell {
     background-color: green;
-  }
+}
 
-  .obstaclce-cell {
+.obstaclce-cell {
     background-color: blue;
-  }
+}
