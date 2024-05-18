@@ -1,22 +1,27 @@
-let planeColumn = 3;
 let gameOver = false;
 let score = 0;
 let cyclicalFunctionsId = [];
 const boardWidth = 7,
     boardHeight = 6;
+    let planeColumn = boardHeight / 2;
+const defaultCell = 0,
+    obstacle = 1,
+    projectile = 2;
+const gameTempo = 1000,
+    colorsTempo = 100,
+    planeMovementTempo = 50;
 const matrix = Array.from({length: boardHeight}, () =>
     new Array(boardWidth).fill(0));
 
 function createTable() {
     const displayTable = document.createElement("table");
-    displayTable.setAttribute("style", "border: 1px solid black");
+    displayTable.className = "styled-table";
     const tableBody = document.createElement("tbody");
     for (let i = 0; i < boardHeight; ++i) {
         const row = document.createElement("tr");
         for (let j = 0; j < boardWidth; ++j) {
             const cell = document.createElement("td");
             cell.id = i + "-" + j;
-            cell.setAttribute("style", "width: 30px; height: 30px");
             row.appendChild(cell);
         }
         tableBody.appendChild(row);
@@ -45,19 +50,18 @@ function setColors() {
         for (let j = 0; j < boardWidth; ++j) {
             let cellId = i + "-" + j;
             let currentCell = document.getElementById(cellId);
-            currentCell.setAttribute("style",
-                "background-color: white; width: 30px; height: 30px");
-            if (matrix[i][j] == 1) {
-                currentCell.setAttribute("style",
-                    "background-color: blue;  width: 30px; height: 30px");
+            currentCell.className = "";
+            if (matrix[i][j] === defaultCell) {
+                currentCell.classList.add("default-cell");
             }
-            if (matrix[i][j] == 2) {
-                currentCell.setAttribute("style",
-                    "background-color: red;  width: 30px; height: 30px");
+            if (matrix[i][j] === obstacle) {
+                currentCell.classList.add("obstaclce-cell");
             }
-            if ((i == boardHeight - 1) && (j == planeColumn)) {
-                currentCell.setAttribute("style",
-                    "background-color: green;  width: 30px; height: 30px");
+            if (matrix[i][j] === projectile) {
+                currentCell.classList.add("projectile");
+            }
+            if ((i === boardHeight - 1) && (j === planeColumn)) {
+                currentCell.classList.add("airplane-cell");
             }
         }
     }
@@ -82,33 +86,33 @@ function newObstacles() {
     }
     let halfWidth = (boardWidth / 2) | 0;
     let currentRandom = Math.floor(Math.random() * (halfWidth + 1));
-    matrix[0][currentRandom] = 1;
+    matrix[0][currentRandom] = obstacle;
     currentRandom = Math.floor(Math.random() * (halfWidth + 1));
-    matrix[0][currentRandom + halfWidth] = 1;
+    matrix[0][currentRandom + halfWidth] = obstacle;
 }
 
 function lowerObstacles() {
     for (let i = boardHeight - 1; i > 0; --i) {
         for (let j = 0; j < boardWidth; ++j) {
-            if (matrix[i][j] === 1) {
-                matrix[i][j] = 0;
+            if (matrix[i][j] === obstacle) {
+                matrix[i][j] = defaultCell;
             }
-            if (matrix[i - 1][j] === 1) {
-                matrix[i][j] = 1;
+            if (matrix[i - 1][j] === obstacle) {
+                matrix[i][j] = obstacle;
             }
         }
     }
 }
 
 function checkGameOver() {
-    if (matrix[boardHeight - 1][planeColumn] == 1) {
+    if (matrix[boardHeight - 1][planeColumn] === obstacle) {
         const message = document.getElementById("winnerMessage");
         message.innerHTML = "Game Over! Your score is " + score;
         gameOver = true;
         for (const id of cyclicalFunctionsId) {
             clearInterval(id);
         }
-        planeColumn = 3;
+        planeColumn = boardHeight / 2;
     }
 }
 
@@ -120,7 +124,7 @@ function displayScore() {
 function shoot() {
     document.addEventListener("keydown", (event) => {
         if (event.key === "ArrowUp") {
-            matrix[boardHeight - 2][planeColumn] = 2;
+            matrix[boardHeight - 2][planeColumn] = projectile;
         }
     });
 }
@@ -128,13 +132,13 @@ function shoot() {
 function advanceProjectiles() {
     for (let i = 1; i < boardHeight; ++i) {
         for (let j = 0; j < boardWidth; ++j) {
-            if (matrix[i][j] === 2) {
-                matrix[i][j] = 0;
-                if (matrix[i - 1][j] === 1) {
-                    matrix[i - 1][j] = 0;
+            if (matrix[i][j] === projectile) {
+                matrix[i][j] = defaultCell;
+                if (matrix[i - 1][j] === obstacle) {
+                    matrix[i - 1][j] = defaultCell;
                     ++score;
                 } else {
-                    matrix[i - 1][j] = 2;
+                    matrix[i - 1][j] = projectile;
                 }
             }
         }
@@ -152,17 +156,17 @@ function advanceGame() {
     } else {
         startTime = Date.now();
         let currentId = 0;
-        currentId = setInterval(displayScore, 100);
+        currentId = setInterval(displayScore, colorsTempo);
         cyclicalFunctionsId.push(currentId);
-        currentId = setInterval(advanceProjectiles, 100);
+        currentId = setInterval(advanceProjectiles, colorsTempo);
         cyclicalFunctionsId.push(currentId);
-        currentId = setInterval(checkGameOver, 50);
+        currentId = setInterval(checkGameOver, planeMovementTempo);
         cyclicalFunctionsId.push(currentId);
-        currentId = setInterval(setColors, 50);
+        currentId = setInterval(setColors, planeMovementTempo);
         cyclicalFunctionsId.push(currentId);
-        currentId = setInterval(lowerObstacles, 1000);
+        currentId = setInterval(lowerObstacles, gameTempo);
         cyclicalFunctionsId.push(currentId);
-        currentId = setInterval(newObstacles, 1000);
+        currentId = setInterval(newObstacles, gameTempo);
         cyclicalFunctionsId.push(currentId);
     }
 }

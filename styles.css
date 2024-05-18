@@ -1,0 +1,25 @@
+.styled-table {
+    border: 1px solid black;
+}
+
+.styled-table td {
+    width: 30px;
+    height: 30px;
+  }
+
+  .projectile {
+    background-color: red;
+    border-radius: 50%;
+  }
+
+  .default-cell {
+    background-color: white;
+  }
+
+  .airplane-cell {
+    background-color: green;
+  }
+
+  .obstaclce-cell {
+    background-color: blue;
+  }
